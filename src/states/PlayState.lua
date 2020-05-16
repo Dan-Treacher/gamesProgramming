@@ -98,22 +98,7 @@ function PlayState:update(dt)
                 self.paddle.size = self.paddle.size - 1
                 self.paddle.size = math.max(0, self.paddle.size)
             end
---[[
-            if powerup.skin == 9 then
-               -- Remove the powerup from the table
-                table.remove(self.powerups, k)  -- arg2 is the key for which powerup to remove (as in the one that's collided with the paddle)
 
-                b = Ball(math.random(1,7))  -- Instantiate the Ball object with random skin for any of the seven sprites
-                b.x = self.paddle.x + self.paddle.width/2
-                b.y = self.paddle.y + 10
-                b.dx = math.random(-200, 200)  -- This is the initial state, so we'll have only one ball which is at position [1] in the table
-                b.dy = math.random(-50, -60)
-                table.insert(self.balls, b)  -- Upon collision of the powerup and the paddle, spawn another ball with it's default parameters
-            else
-                self.hasKey = true
-                table.remove(self.powerups, k)
-            end
-        ]]
         end
 
         -- if the powerup leaves the play area then remove it to avoid the self.powerups table from getting too large
