@@ -75,20 +75,30 @@ function PlayState:update(dt)
 
         -- if the powerup collides with the paddle then remove it from the table (so it's no longer rendered)
         if powerup:collides(self.paddle) then
-            if powerup.skin == 9 then
-               -- Remove the powerup from the table
-                table.remove(self.powerups, k)  -- arg2 is the key for which powerup to remove (as in the one that's collided with the paddle)
-
+            if powerup.skin == 9 then  -- new ball
+                table.remove(self.powerups, k)
                 b = Ball(math.random(1,7))  -- Instantiate the Ball object with random skin for any of the seven sprites
                 b.x = self.paddle.x + self.paddle.width/2
                 b.y = self.paddle.y + 10
                 b.dx = math.random(-200, 200)  -- This is the initial state, so we'll have only one ball which is at position [1] in the table
                 b.dy = math.random(-50, -60)
-                table.insert(self.balls, b)  -- Upon collision of the powerup and the paddle, spawn another ball with it's default parameters
-            else
-                self.hasKey = true
-                table.remove(self.powerups, k)
+                table.insert(self.balls, b)
             end
+            if powerup.skin == 10 then  -- Key
+                table.remove(self.powerups, k)
+                self.hasKey = true
+            end
+            if powerup.skin == 5 then
+                table.remove(self.powerups, k)
+                self.paddle.size = self.paddle.size + 1
+                self.paddle.size = math.min(self.paddle.size, 4)
+            end
+            if powerup.skin == 6 then
+                table.remove(self.powerups, k)
+                self.paddle.size = self.paddle.size - 1
+                self.paddle.size = math.max(1, self.paddle.size)
+            end
+
         end
 
         -- if the powerup leaves the play area then remove it to avoid the self.powerups table from getting too large
@@ -150,28 +160,36 @@ function PlayState:update(dt)
                 -- add to score
                 self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
-                -- Calculate random number to see which powerup is spawned
-                powerupRandomiser = math.random(1,1)
-                local p = nil
-                if powerupRandomiser == 1 then  -- Randomise the chance of a collision producing a powerup. Set scalar according to generosity
-                    gSounds['recover']:play()
-                    if self.hasKey == false then  -- If you already have a key, don't bother generating more
-                        key = math.random(1, 10)
-                        if key == 10 then
-                            p = Powerup(key) -- Remember to include this in the dependencies file or it won't know what this class is
-                        else
-                            p = Powerup(9)
-                        end
-                        
-                    else
-                        p = Powerup(9)
-                    end
-                    -- Need to tell it where to spawn (p.x, p.y) because these are used in the update function, and not set in the initialisation hence it'll crash when looking for those values
-                    p.x = brick.x
-                    p.y = brick.y
-
-                    table.insert(self.powerups, p)
+                -- Random number for powerup depends on whether you've already got the key or not
+                if self.hasKey == true then
+                    powerupRandomiser = math.random(-4,3)  -- Bias the randomiser toward releaseing new balls
+                else
+                    powerupRandomiser = math.random(-4,4)
                 end
+                local p = nil
+
+                if powerupRandomiser <= 1 then  -- New ball
+                    gSounds['recover']:play()
+                    p = Powerup(9)
+                end
+                if powerupRandomiser == 2 then  -- Paddle extend
+                    gSounds['recover']:play()
+                    p = Powerup(5)
+                end
+                if powerupRandomiser == 3 then  -- Paddle shrink
+                    gSounds['recover']:play()
+                    p = Powerup(6)
+                end
+                if powerupRandomiser == 4 then  -- Key
+                    gSounds['recover']:play()
+                    p = Powerup(10)
+                end
+                
+                p.x = brick.x
+                p.y = brick.y
+
+                table.insert(self.powerups, p)
+            end
 
                 -- trigger the brick's hit function, which removes it from play
                 brick:hit()
@@ -192,8 +210,8 @@ function PlayState:update(dt)
                     self.paddle.size = math.min(self.paddle.size, 4)  -- There are only 4 available paddle sizes
                     -- Note the update in the paddle class that handles updating the hitbox size according to self.paddle.size
                 end
-
-            end
+            
+            --end
 
             -- go to our victory screen if there are no more bricks left
             if self:checkVictory() then
