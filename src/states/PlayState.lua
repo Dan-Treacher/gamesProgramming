@@ -96,7 +96,7 @@ function PlayState:update(dt)
             if powerup.skin == 6 then
                 table.remove(self.powerups, k)
                 self.paddle.size = self.paddle.size - 1
-                self.paddle.size = math.max(0, self.paddle.size)
+                self.paddle.size = math.max(1, self.paddle.size)
             end
 
         end
@@ -162,13 +162,13 @@ function PlayState:update(dt)
 
                 -- Random number for powerup depends on whether you've already got the key or not
                 if self.hasKey == true then
-                    powerupRandomiser = math.random(1,3)
+                    powerupRandomiser = math.random(-4,3)  -- Bias the randomiser toward releaseing new balls
                 else
-                    powerupRandomiser = math.random(1,4)
+                    powerupRandomiser = math.random(-4,4)
                 end
                 local p = nil
 
-                if powerupRandomiser == 1 then  -- New ball
+                if powerupRandomiser <= 1 then  -- New ball
                     gSounds['recover']:play()
                     p = Powerup(9)
                 end
